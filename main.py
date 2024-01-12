@@ -1,12 +1,14 @@
 from kivy.app import App
 from kivy.uix.button import Button
-
+from kivy.uix.widget import Widget
 
 class MainApp(App):
     def build(self):
-        button = Button(text="Hello world", size_hint=(0.5, 0.5),
-                        pos_hint={'center_x': 0.5, 'center_y': 0.5})
-        return button
+        pass
+
+class MainWidget(Widget):
+    def __init__(self, **kwargs):
+        super(MainWidget, self).__init__(**kwargs)
 
 if __name__ == '__main__':
     app = MainApp()
