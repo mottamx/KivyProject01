@@ -1,19 +1,30 @@
-#This is my MainWidget
+<TemplateScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        BoxLayout:
+            size_hint_y: None
+            height: 40  
+            canvas.before:
+                Color:
+                    rgba: 0.1, 0.3, 0.5, 1  #background color
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
 
-<Screen1>
-    name: "screen1"
-    Label:
-        id: myLabel
-        text: "This Screen 1"
-    Button: 
-        text: "Check Screen 2"
-        on_release: root.manager.current = "screen2"
+            Widget:
 
-<Screen2>
-    name: "screen2"
-    Label:
-        id: myLabel
-        text: "This Screen 2"
-    Button: 
-        text: "Check Screen 1"
-        on_release: root.manager.current = "screen1"
+            Widget: 
+
+            Widget: 
+            
+            Button:
+                text: 'Texto'
+                background_color: 0.2, 0.5, 0.7, 1  
+            Button:
+                text: 'Config.'
+                background_color: 0.2, 0.5, 0.7, 1  
+                
+            # Add more menu items as needed
+
+        Label:
+            text: 'Hello, this is the Template Screen!'
