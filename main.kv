@@ -1,14 +1,19 @@
 #This is my MainWidget
 
-MainWidget:
-    GridLayout:
-        cols: 1
-        rows: 2
-        size: 200,200
-        Label:
-            id: myLabel
-            text: "This is the label"
-        Button: 
-            text: "This is the button"
-            on_press: root.ids.myLabel.text = "Button pressed"
-            on_release: root.ids.myLabel.text = "This is the label"
+<Screen1>
+    name: "screen1"
+    Label:
+        id: myLabel
+        text: "This Screen 1"
+    Button: 
+        text: "Check Screen 2"
+        on_release: root.manager.current = "screen2"
+
+<Screen2>
+    name: "screen2"
+    Label:
+        id: myLabel
+        text: "This Screen 2"
+    Button: 
+        text: "Check Screen 1"
+        on_release: root.manager.current = "screen1"
