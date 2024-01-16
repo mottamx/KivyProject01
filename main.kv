@@ -1,49 +1,96 @@
-# myapp.kv
-<MenuWidget>:
-    orientation: 'vertical'
-    BoxLayout:
-        size_hint_y: None
-        height: 40  
-        canvas.before:
-            Color:
-                rgba: 0.1, 0.3, 0.5, 1  # Background color
-            Rectangle:
-                pos: self.pos
-                size: self.size
+# main.kv
+MDScreen:
+    MDBottomNavigation:
+        selected_color_background: app.theme_cls.primary_color
+        text_color_active: "lightgrey"
 
-        Widget:
-        Widget: 
-        Widget: 
+        MDBottomNavigationItem:
+            name: 'screen_one'
+            text: 'Dispositivo'
+            icon: 'typewriter'
+            #on_tab_release: screen_manager.current = 'screen_one'
 
-        Button:
-            text: 'Texto'
-            background_color: 0.2, 0.5, 0.7, 1
-            on_release: app.root.current = 'main'
+            MDScreen:
+                MDLabel:
+                    text: 'Screen One Content'
+#Segunda pantalla
+        MDBottomNavigationItem:
+            name: 'screen_two'
+            text: 'Conexión'
+            icon: 'connection'
+            #on_tab_release: screen_manager.current = 'screen_two'
 
-        Button:
+            GridLayout:
+                cols: 1
+                size_hint_y: None
+                height: root.height
+
+	            MDLabel:
+                    text: ''
+                    halign: 'center'
+
+                #Texto
+                MDLabel:
+                    text: 'Presiona Actualizar para obtener la lista de dispositivos conectados.'
+                    halign: 'center'
+
+                #Botones
+                GridLayout:
+                    cols: 3
+                    row_default_height: dp(48)  # Adjust the height as needed
+                    spacing: dp(10)
+                    padding: dp(30), 0
+
+                    MDRaisedButton:
+                        id: update_button
+                        text: 'Actualizar'
+                        on_release: app.update_button_pressed()
+
+                    MDRaisedButton:
+                        id: button
+                        text: "Seleccionar"
+                        size_hint_x: 2
+                    
+                    MDRaisedButton:
+                        id: update_button
+                        text: 'Conectar'
+                        on_release: app.connect_button_pressed()
+
+                MDLabel:
+                    text: "Row3"
+                    halign: 'center'
+
+                MDLabel:
+                    text: "Row4"
+                    halign: 'center'
+                
+                MDLabel:
+                    text: "Row5"
+                    halign: 'center'
+
+#Otra pantalla
+        MDBottomNavigationItem:
+            name: 'screen_three'
             text: 'Config.'
-            background_color: 0.2, 0.5, 0.7, 1
-            on_release: app.root.current = 'config'
+            icon: 'cog'
+            #on_tab_release: screen_manager.current = 'screen_three'
+            
+            MDScreen:
+                MDLabel:
+                    text: 'Screen three Content'
 
-    Label:
-        text: ''
 
-<MainScreen>:
-    name: "main"
-    MenuWidget:
-    Label:
-        text: 'Hello, this is the Main Screen!'
 
-<ConfigScreen>:
-    name: "config"
-    BoxLayout:
-        orientation: 'vertical'
-        MenuWidget:
-        Label:
-            text: 'So here you have to setup the device:'
-        BoxLayout:
-            orientation: 'horizontal'
-            Label:
-                text: 'This is a Label'
-            Button:
-                text: 'This is a Button'
+<MenuHeader>
+    spacing: "12dp"
+    padding: "4dp"
+    adaptive_height: True
+
+    MDIconButton:
+        icon: "gesture-tap-button"
+        pos_hint: {"center_y": .5}
+
+    MDLabel:
+        text: "Actions"
+        adaptive_size: True
+        pos_hint: {"center_y": .5}
