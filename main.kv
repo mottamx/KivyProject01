@@ -144,13 +144,36 @@
     MDScreen:
         BoxLayout:
             orientation: 'vertical'
-            spacing: 10
+            spacing: 20
             padding: [10, 10, 10, 10]
+            
+            BoxLayout:
+                size_hint: 1, .3
+                orientation: 'horizontal'
+                spacing: 10
+                
+                MDFillRoundFlatIconButton:
+                    text: "Volver"
+                    icon: 'chevron-left'
+                    md_bg_color: app.theme_cls.bg_light
+                    on_release: app.on_goback_button_press()
+
+
+                MDLabel:
+                    text: "Configuración inicial (1/3)"
+                    halign: "center"
+                    font_style: "H6"
+
+            Image:
+                source: 'src/router.png'
+                size_hint: 1, 1
+                pos_hint: {'center_x': 0.5, 'center_y': 0.5}  # Center the image
+                fit_mode: "contain" 
 
             MDLabel:
-                text: "Configure your IoT device"
+                text: "Coloca las credenciales de la red Wifi a la que se conectará la máquina"
                 halign: "center"
-                font_style: "H6"
+
             MDTextField:
                 id: ssid
                 hint_text: "Enter WiFi SSID"
@@ -165,7 +188,104 @@
                     id: passw_eye
                     icon: 'eye-off'
                     on_release: root.toggle_password_visibility()
-                    
+
             MDRaisedButton:
-                text: "Submit"
+                size_hint: None, None
+                size: "200dp", "50dp"
+                pos_hint: {"center_x": 0.5, "center_y": 0.5}  # Center the button
+                text: "Siguiente"
                 on_release: root.on_submit_button_press()
+
+<IoTInfoScreen>:
+    name: "iotinfo_screen"
+    MDScreen:
+        BoxLayout:
+            orientation: 'vertical'
+            spacing: 20
+            padding: [10, 10, 10, 10]
+            
+            BoxLayout:
+                size_hint: 1, .3
+                orientation: 'horizontal'
+                spacing: 10
+                
+                MDFillRoundFlatIconButton:
+                    text: "Volver"
+                    icon: 'chevron-left'
+                    md_bg_color: app.theme_cls.bg_light
+                    on_release: app.on_goback_button_press()
+
+
+                MDLabel:
+                    text: "Configuración inicial (2/3)"
+                    halign: "center"
+                    font_style: "H6"
+
+            Carousel:
+                direction: 'right'
+                AsyncImage:
+                    source: 'http://placehold.it/480x270.png&text=slide-1.png'
+                AsyncImage:
+                    source: 'http://placehold.it/480x270.png&text=slide-2.png'
+                AsyncImage:
+                    source: 'http://placehold.it/480x270.png&text=slide-3.png'
+                AsyncImage:
+                    source: 'http://placehold.it/480x270.png&text=slide-4.png'
+            
+            MDLabel:
+                text: 'Ahora conectate a la red Wifi de la Maquina. Debe ser "TypeTurbo", y presiona siguiente.'
+                halign: "center"
+
+            MDRaisedButton:
+                id: tolink_btn
+                size_hint: None, None
+                size: "200dp", "50dp"
+                pos_hint: {"center_x": 0.5, "center_y": 0.5}  # Center the button
+                text: "Siguiente"
+                on_release: root.on_tolink_btn_press()
+
+<LinkingScreen>:
+    name: "linking_screen"
+    MDScreen:
+        BoxLayout:
+            orientation: 'vertical'
+            spacing: 20
+            padding: [10, 10, 10, 10]
+            
+            BoxLayout:
+                size_hint: 1, .3
+                orientation: 'horizontal'
+                spacing: 10
+                
+                MDFillRoundFlatIconButton:
+                    text: "Volver"
+                    icon: 'chevron-left'
+                    md_bg_color: app.theme_cls.bg_light
+                    on_release: app.on_goback_button_press()
+
+                MDLabel:
+                    text: "Configuración inicial (3/3)"
+                    halign: "center"
+                    font_style: "H6"
+
+            Carousel:
+                id: link_car
+                direction: 'right'
+                swipe_distance: 0
+                AsyncImage:
+                    source: 'http://placehold.it/480x270.png&text=slide-1.png'
+                AsyncImage:
+                    source: 'http://placehold.it/480x270.png&text=slide-2.png'
+                AsyncImage:
+                    source: 'http://placehold.it/480x270.png&text=slide-3.png'
+                AsyncImage:
+                    source: 'http://placehold.it/480x270.png&text=slide-4.png'
+            
+
+            MDRaisedButton:
+                id: tolink_btn
+                size_hint: None, None
+                size: "200dp", "50dp"
+                pos_hint: {"center_x": 0.5, "center_y": 0.5}  # Center the button
+                text: "SALIR"
+                
