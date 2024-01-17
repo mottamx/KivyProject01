@@ -1,96 +1,171 @@
 # main.kv
-MDScreen:
-    MDBottomNavigation:
-        selected_color_background: app.theme_cls.primary_color
-        text_color_active: "lightgrey"
 
-        MDBottomNavigationItem:
-            name: 'screen_one'
-            text: 'Dispositivo'
-            icon: 'typewriter'
-            #on_tab_release: screen_manager.current = 'screen_one'
+<InitialScreen>:
+    name: "initial_screen"
+    MDScreen:
+        MDBottomNavigation:
+            selected_color_background: app.theme_cls.primary_color
+            text_color_active: "lightgrey"
 
-            MDScreen:
-                MDLabel:
-                    text: 'Screen One Content'
-#Segunda pantalla
-        MDBottomNavigationItem:
-            name: 'screen_two'
-            text: 'Conexión'
-            icon: 'connection'
-            #on_tab_release: screen_manager.current = 'screen_two'
+            #Primera pantalla
+            MDBottomNavigationItem:
+                name: 'screen_two'
+                text: 'Conexión'
+                icon: 'connection'
+                #on_tab_release: screen_manager.current = 'screen_two'
 
-            GridLayout:
-                cols: 1
-                size_hint_y: None
-                height: root.height
-
-	            MDLabel:
-                    text: ''
-                    halign: 'center'
-
-                #Texto
-                MDLabel:
-                    text: 'Presiona Actualizar para obtener la lista de dispositivos conectados.'
-                    halign: 'center'
-
-                #Botones
                 GridLayout:
-                    cols: 3
-                    row_default_height: dp(48)  # Adjust the height as needed
-                    spacing: dp(10)
-                    padding: dp(30), 0
+                    cols: 1
+                    size_hint_y: None
+                    height: root.height
 
-                    MDRaisedButton:
-                        id: update_button
-                        text: 'Actualizar'
-                        on_release: app.update_button_pressed()
+                    MDLabel:
+                        text: ''
+                        halign: 'center'
 
-                    MDRaisedButton:
-                        id: button
-                        text: "Seleccionar"
-                        size_hint_x: 2
+                    #Texto
+                    MDLabel:
+                        text: 'Presiona Actualizar para obtener la lista de dispositivos conectados.'
+                        halign: 'center'
+
+                    #Botones
+                    GridLayout:
+                        cols: 3
+                        row_default_height: dp(48)  # Adjust the height as needed
+                        spacing: dp(10)
+                        padding: dp(30), 0
+
+                        MDRaisedButton:
+                            id: update_button
+                            text: 'Actualizar'
+                            on_release: app.update_button_pressed()
+
+                        MDRaisedButton:
+                            id: button
+                            text: "Seleccionar"
+                            size_hint_x: 2
+                        
+                        MDRaisedButton:
+                            id: update_button
+                            text: 'Conectar'
+                            on_release: app.connect_button_pressed()
+
+                    MDLabel:
+                        text: "Row3"
+                        halign: 'center'
+
+                    MDLabel:
+                        text: "Row4"
+                        halign: 'center'
                     
-                    MDRaisedButton:
-                        id: update_button
-                        text: 'Conectar'
-                        on_release: app.connect_button_pressed()
+                    MDLabel:
+                        text: "Row5"
+                        halign: 'center'
+                        
 
-                MDLabel:
-                    text: "Row3"
-                    halign: 'center'
-
-                MDLabel:
-                    text: "Row4"
-                    halign: 'center'
+            #Segunda Pantalla
+            MDBottomNavigationItem:
+                name: 'screen_one'
+                text: 'Dispositivo'
+                icon: 'typewriter'
+                #on_tab_release: screen_manager.current = 'screen_one'
+                #Vertical todo, ultimos dos tienen dos horizontal o grid 2 col
                 
-                MDLabel:
-                    text: "Row5"
-                    halign: 'center'
-
-#Otra pantalla
-        MDBottomNavigationItem:
-            name: 'screen_three'
-            text: 'Config.'
-            icon: 'cog'
-            #on_tab_release: screen_manager.current = 'screen_three'
+                BoxLayout:
+                    orientation: 'vertical'
+                    spacing: 10
+                    padding: [10, 10, 10, 10]
             
-            MDScreen:
-                MDLabel:
-                    text: 'Screen three Content'
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        spacing: 10
 
+                        Carousel:
+                            id: my_carousel
+                            size_hint: 0.8, 1
+                            direction: 'right'
+                            AsyncImage:
+                                source: 'http://placehold.it/480x270.png&text=slide-1.png'
+                            AsyncImage:
+                                source: 'http://placehold.it/480x270.png&text=slide-2.png'
+                            AsyncImage:
+                                source: 'http://placehold.it/480x270.png&text=slide-3.png'
+                            AsyncImage:
+                                source: 'http://placehold.it/480x270.png&text=slide-4.png'
+                        
+                           
+                        MDRoundFlatIconButton:
+                            text: "Añadir"
+                            #text_color: "white"
+                            icon: 'plus'
+                            on_release: app.on_icon_button_press()
 
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        spacing: 10
 
-<MenuHeader>
-    spacing: "12dp"
-    padding: "4dp"
-    adaptive_height: True
+                        MDRaisedButton:
+                            id: s1_b2
+                            text: 'Btns Scan'
+                            size_hint: .7, 1
+                        
+                        MDRaisedButton:
+                            id: s1_b3
+                            text: 'Bigbutton Connect'
+                            pos_hint: {'right': 1}
+                            size_hint: .3, 1
+                    
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        spacing: 10
+                        
+                        AsyncImage:
+                            source: 'http://placehold.it/480x270.png&text=slide-4.png'
+                            size_hint: .3, 1
+                        
+                        MDRaisedButton:
+                            id: s1_b6
+                            text: 'Bts scan connect'
+                            size_hint: .7, 1
 
-    MDIconButton:
-        icon: "gesture-tap-button"
-        pos_hint: {"center_y": .5}
+            #Tercera pantalla
+            MDBottomNavigationItem:
+                name: 'screen_three'
+                text: 'Config.'
+                icon: 'cog'
+                #on_tab_release: screen_manager.current = 'screen_three'
+                
+                MDScreen:
+                    MDLabel:
+                        text: 'Screen three Content'
 
-    MDLabel:
-        text: "Actions"
-        adaptive_size: True
-        pos_hint: {"center_y": .5}
+<IoTScreen>:
+    name: "iot_screen"
+    MDScreen:
+        BoxLayout:
+            orientation: 'vertical'
+            spacing: 10
+            padding: [10, 10, 10, 10]
+
+            MDLabel:
+                text: "Configure your IoT device"
+                halign: "center"
+                font_style: "H6"
+            MDTextField:
+                id: ssid
+                hint_text: "Enter WiFi SSID"
+            GridLayout:
+                cols: 2
+                MDTextField:
+                    id: passw
+                    hint_text: "Enter WiFi Password"
+                    password: True  # Set to True to initially mask the password
+                    password_mask: '*'
+                MDIconButton:
+                    id: passw_eye
+                    icon: 'eye-off'
+                    on_release: root.toggle_password_visibility()
+                    
+            MDRaisedButton:
+                text: "Submit"
+                on_release: root.on_submit_button_press()
