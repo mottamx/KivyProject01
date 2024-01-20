@@ -153,6 +153,8 @@
                 spacing: 10
                 
                 MDFillRoundFlatIconButton:
+                    size_hint: None, None
+                    size: "100dp", "50dp"
                     text: "Volver"
                     icon: 'chevron-left'
                     md_bg_color: app.theme_cls.bg_light
@@ -210,7 +212,10 @@
                 spacing: 10
                 
                 MDFillRoundFlatIconButton:
+                    size_hint: None, None
+                    size: "100dp", "50dp"
                     text: "Volver"
+                    size: "100dp", "50dp"
                     icon: 'chevron-left'
                     md_bg_color: app.theme_cls.bg_light
                     on_release: app.on_goback_button_press()
@@ -259,6 +264,8 @@
                 
                 MDFillRoundFlatIconButton:
                     text: "Volver"
+                    size_hint: None, None
+                    size: "100dp", "50dp"
                     icon: 'chevron-left'
                     md_bg_color: app.theme_cls.bg_light
                     on_release: app.on_goback_button_press()
@@ -281,6 +288,12 @@
                 AsyncImage:
                     source: 'http://placehold.it/480x270.png&text=slide-4.png'
             
+            MDProgressBar:
+                id: progress_bar
+                size_hint_y: None
+                height: "8dp"
+                max: 100
+                value: 0
 
             MDRaisedButton:
                 id: tolink_btn

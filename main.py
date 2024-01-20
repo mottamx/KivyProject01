@@ -64,13 +64,16 @@ class LinkingScreen(Screen):
         # Start the first step
         self.check_esp_availability()
         
+    def update_progress(self, value):
+        self.ids.progress_bar.value = value  
+          
     def carousel_on_touch_move(self, instance, touch):
         if self.link_car.current_slide != self.current_slide_index:
             # If the current slide doesn't match the stored index, move back
             self.link_car.load_slide(self.link_car.slides[self.current_slide_index])
               
     def check_esp_availability(self):
-        # Check if ESP is available
+        # Check if ESP is available. Remember we previously connected to the device local network
         
         # Move to the next slide if successful, else go back to the previous slide
         #self.link_car.load_slide(self.link_car.slides[1])
