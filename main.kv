@@ -207,7 +207,7 @@
             padding: [10, 10, 10, 10]
             
             BoxLayout:
-                size_hint: 1, .3
+                size_hint_y: 0.2
                 orientation: 'horizontal'
                 spacing: 10
                 
@@ -227,19 +227,29 @@
                     font_style: "H6"
 
             Carousel:
+                size_hint_y: 0.6
                 direction: 'right'
                 AsyncImage:
-                    source: 'http://placehold.it/480x270.png&text=slide-1.png'
+                    source: 'src/Wifi_01.png'
                 AsyncImage:
-                    source: 'http://placehold.it/480x270.png&text=slide-2.png'
+                    source: 'src/Wifi_02.png'
                 AsyncImage:
-                    source: 'http://placehold.it/480x270.png&text=slide-3.png'
+                    source: 'src/Wifi_03.png'
                 AsyncImage:
-                    source: 'http://placehold.it/480x270.png&text=slide-4.png'
-            
-            MDLabel:
-                text: 'Ahora conectate a la red Wifi de la Maquina. Debe ser "TypeTurbo", y presiona siguiente.'
-                halign: "center"
+                    source: 'src/Wifi_04.png'
+                AsyncImage:
+                    source: 'src/Wifi_05.png'
+                AsyncImage:
+                    source: 'src/Wifi_06.png'
+                    
+            BoxLayout:
+                size_hint_y: 0.2
+                orientation: 'vertical'
+                spacing: 10
+
+                MDLabel:
+                    text: 'Ahora conectate a la red Wifi de la Maquina. Debe ser "TypeTurbo", y presiona siguiente.'
+                    halign: "center"
 
             MDRaisedButton:
                 id: tolink_btn
@@ -280,14 +290,16 @@
                 direction: 'right'
                 swipe_distance: 0
                 AsyncImage:
-                    source: 'http://placehold.it/480x270.png&text=slide-1.png'
+                    source: 'src/DC_00.png'
                 AsyncImage:
-                    source: 'http://placehold.it/480x270.png&text=slide-2.png'
+                    source: 'src/DC_01.png'
                 AsyncImage:
-                    source: 'http://placehold.it/480x270.png&text=slide-3.png'
+                    source: 'src/DC_02.png'
                 AsyncImage:
-                    source: 'http://placehold.it/480x270.png&text=slide-4.png'
-            
+                    source: 'src/DC_03.png'
+                AsyncImage:
+                    source: 'src/DC_04.png'
+
             MDProgressBar:
                 id: progress_bar
                 size_hint_y: None

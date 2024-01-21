@@ -5,7 +5,7 @@
 #define EEPROM_ADDRESS 0
 #define EEPROM_SIZE 1024
 #define MAX_CONNECTION_ATTEMPTS 3
-#define RETRY_DELAY 5000  // 5 seconds delay between connection attempts
+#define RETRY_DELAY 10000  // 5 seconds delay between connection attempts
 #define CLEAR_EEPROM_BUTTON_PIN 4
 
 
@@ -177,7 +177,8 @@ void handleKeysRequest(String requestLine, WiFiClient& client) {
         client.println("Content-Type: text/html");
         client.println("");
         client.println("Saved");
-        delay(2000);  /*ESP32 Reset after every 10 sec*/
+        client.stop();
+        delay(10000);  /*ESP32 Reset after 10 sec*/
         ESP.restart();  /*ESP restart function*/
       } else {
         Serial.println("Error: Missing (ssid/pass)");
@@ -259,5 +260,10 @@ void loop() {
     retrieveSavedCredentials(client);
   } else if (requestLine.indexOf("/clear") != -1){
     clearEEPROM();
+    delay(2000);  /*ESP32 Reset after 2 sec*/
+    Serial.println("Restart");
+    ESP.restart();  /*ESP restart function*/
   }
 }
+
+//keys; live; nets; clear;
