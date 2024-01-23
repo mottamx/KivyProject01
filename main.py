@@ -9,35 +9,40 @@ from kivymd.uix.button import MDRaisedButton
 from kivymd.uix.button import MDFloatingActionButtonSpeedDial
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivymd.uix.snackbar import Snackbar
-from zeroconf import Zeroconf, ServiceBrowser
+from zeroconf import ServiceBrowser, ServiceListener, Zeroconf
 from kivy.network.urlrequest import UrlRequest
+import requests
 from kivy.clock import Clock
 import ipaddress
-from ping3 import ping, verbose_ping
+from functools import partial
 
 
 class InitialScreen(Screen):
     pass
-
+    # def connect_device(self):
+    #     print(f"connect_device IS")
+        
 
 class IoTScreen(Screen):
 
     def on_submit_button_press(self):
         # Receive the Wifi config
         app = MDApp.get_running_app()
-        app.ssid_text = self.ids.ssid.text
+        # app.ssid_text = self.ids.ssid.text
         app.pass_text = self.ids.passw.text
+        app.ssid_text = self.ids.ssid.text.replace(" ", "%20")
+
         if not app.ssid_text or not app.pass_text:
             # Show a Snackbar warning if either field is empty
             Snackbar(
                 text="No pueden estar vacios SSID o password",
                 duration=2,
-                bg_color=(1, 0, 0, 1),
+                bg_color=(1, 0, 0, 1)
             ).open()
         else:
             # print(app.ssid_text + " " + app.pass_text)
             # Clear the MDTextField widgets
-            #self.ids.ssid.text = ""
+            # self.ids.ssid.text = ""
             self.ids.passw.text = ""
             app.screen_manager.current = "iotinfo_screen"
 
@@ -69,7 +74,7 @@ class LinkingScreen(Screen):
 
     def on_enter(self, *args):
         # print("Starting linking")
-        self.update_progress(10)
+        self.update_progress(5)
         self.check_esp_availability()
 
     def update_progress(self, value):
@@ -83,26 +88,27 @@ class LinkingScreen(Screen):
 
     def check_esp_availability(self):
         app = MDApp.get_running_app()
-        print("check_esp_availability")
+        #print("check_esp_availability")
         url = "http://192.168.4.1/live"
-        req = UrlRequest(url, on_success=self.on_request_success, on_failure=lambda req,
-                         result, app=app: self.on_request_failure(req, result, app), timeout=2)
-
-
+        req = UrlRequest(url, on_success=self.on_request_success, 
+                         on_error=lambda req,result, app=app: self.on_request_failure(req, result, app), timeout=3)
+   
     def on_request_success(self, req, result):
-        #headers = req.resp_headers
+        # headers = req.resp_headers
         #print(f"on_request_success")
-        self.update_progress(40)
         receivedStr = req.result.strip()
-        #print(f"Received : {receivedStr}") #Comparemos esta
+        # print(f"Received : {receivedStr}") #Comparemos esta
         if receivedStr == "TypeTurboIsAlive":
-            print(f"Success, next step...")
+            #print(f"Success, next step...")
             self.current_slide_index = 1
             self.link_car.load_next()
+            self.update_progress(30)
             self.exchange_credentials()
 
     def on_request_failure(self, req, result, app):
-        print(f"Failed to receive data: {result}")
+        #print(f"Failed to receive data: {result}")
+        self.update_progress(0)
+        self.current_slide_index = 0
         app.screen_manager.current = "iotinfo_screen"
         Snackbar(
             text="Asegurate de estar conectado a TypeTurbo",
@@ -111,64 +117,75 @@ class LinkingScreen(Screen):
         ).open()
 
     def exchange_credentials(self):
+        #print("exchange_credentials")
         app = MDApp.get_running_app()
         # Encrypt and exchange credentials with ESP
-        print("exchange_credentials")
-        self.update_progress(50)
-        #print(f"Third hop: {app.ssid_text} {app.pass_text}")
+        # print(f"Third hop: {app.ssid_text} {app.pass_text}")
         urlRawCred = f"http://192.168.4.1/keys?ssid={
             app.ssid_text}&pass={app.pass_text}"
-        print(urlRawCred)
-        req = UrlRequest(urlRawCred, on_success=self.on_request_second, on_failure=lambda req,
-                         result, app=app: self.on_request_failure(req, result, app), timeout=2)
-        
+        self.current_slide_index = 2
+        self.link_car.load_next()
+        self.update_progress(50)
+        req = UrlRequest(urlRawCred, on_success=self.on_request_second, 
+                         on_error=lambda req,result, app=app: self.on_request_failure(req, result, app), timeout=3)
+
     def on_request_second(self, req, result):
         # Called on successful UrlRequest
-        print(f"Received: {result}")
+        #print(f"Received: {result}")
         if result.strip() == "Saved":
-            print(f"Success, next step...")
-            self.current_slide_index = 2
+            #print(f"Success on_request_second")
+            Snackbar(
+                text="Cambia a la red WiFi del formulario",
+                duration=5,
+                bg_color=(0.176, 0.184, 0.243, 1)
+            ).open()
+            self.current_slide_index = 3
             self.link_car.load_next()
-            self.wait_for_connection()
-        
-    def wait_for_connection(self):
-        # Wait for ESP to connect to the network
-        print("wait_for_connection")
+            # Wait 15 secs to have time to change network
+            Clock.schedule_once(self.wait_for_connection, 20)  
+
+    def wait_for_connection(self, dt):
+        app = MDApp.get_running_app()
+        self.current_slide_index = 4
+        self.link_car.load_next()
         self.update_progress(70)
+        #print("wait_for_connection")
         zeroconf = Zeroconf()
         listener = MyListener(self)
         browser = ServiceBrowser(zeroconf, "_http._tcp.local.", listener)
-        # Schedule the check_ip_address method to be called every 1 seconds
-        print(f"Got {self.ip_address}")
-        Clock.schedule_interval(self.check_ip_address, 1)
+        # Schedule the wait_for_ip, check every 5 seconds
+        app.event = Clock.schedule_interval(partial(self.wait_for_ip_initial, listener=listener, zeroconf=zeroconf), 2)
+        print(f"Waiting for {app.ip_address}...")
 
-    def check_ip_address(self, dt):
-        # Check if the IP address is available
-        if self.ip_address != "":
-            print(f"Got {self.ip_address}, success")
-            # Stop the Clock schedule when the IP address is found
-            Clock.unschedule(self.check_ip_address)
-            self.current_slide_index = 3
-            self.link_car.load_next()
-            print(f"Got {self.ip_address}, success")
-        else:
-            self.timeout_iterations -= 1
-            if self.timeout_iterations <= 0:
-                print("Timeout reached. IP address not found.")
-                # Stop the Clock schedule when the timeout is reached
-                Clock.unschedule(self.check_ip_address)
-
+    def wait_for_ip_initial(self, dt, listener, zeroconf):
+        print("Checking for IP")
+        app = MDApp.get_running_app()
+        if app.ip_address:
+            #print(f"Found : {app.ip_address}")
+            zeroconf.close()
+            app.screen_manager.current = "initial_screen"
+            app.event.cancel()
+            Snackbar(
+                text="Exito, dispositivo configurado",
+                duration=2,
+                bg_color=(0.176, 0.184, 0.243, 1)
+            ).open()
+        # *******UPDATE THE BUTTON THAT CONNECTS ON INITIAL SCREEN
+        screen_manager = self.root
+        initial_screen = screen_manager.get_screen('initial_screen')
+        s1_connect_button = initial_screen.ids.s1_connect
+        s1_connect_button.text =  f"CONECTAR A TURBOTYPE \n {app.ip_address}"
+        s1_connect_button.disabled = False
+        s1_connect_button.md_bg_color = app.theme_cls.accent_color
 
 class MainApp(MDApp):
     def build(self):
+        app = MDApp.get_running_app()
         self.ssid_text = ""
         self.pass_text = ""
-        self.ip_address = ""
-        self.timeout_iterations = 3  # Adjust as needed
+        app.ip_address = ""
         self.theme_cls.material_style = "M3"
         self.theme_cls.theme_style = "Dark"
-        # Builder.load_file('main.kv')
-        self.enabledVar = False  # Initialize as False
         self.screen_manager = ScreenManager()
         self.screen_manager.add_widget(InitialScreen(name="initial_screen"))
         self.screen_manager.add_widget(IoTScreen(name="iot_screen"))
@@ -177,19 +194,54 @@ class MainApp(MDApp):
         Builder.load_file('main.kv')
         return self.screen_manager
 
+    def update_ip_device(self):
+        app = MDApp.get_running_app()
+        print(f"update_ip_device")
+        if (not app.ip_address):
+            print(f"Missing IP {app.ip_address}")
+            zeroconf = Zeroconf()
+            listener = MyListener(self)
+            browser = ServiceBrowser(zeroconf, "_http._tcp.local.", listener)
+            # Schedule the wait_for_ip, check every 5 seconds
+            app.event = Clock.schedule_interval(partial(self.wait_for_ip, listener=listener, zeroconf=zeroconf), 2)
+            print(f"Waiting for {app.ip_address}...")
+    
+    def connect_device(self):
+        print(f"connect_device MainApp")
+        screen_manager = self.root
+        initial_screen = screen_manager.get_screen('initial_screen')
+        s1_update_button = initial_screen.ids.s1_update
+        s1_update_button.disabled = False        
+
+        
     def connect_button_pressed(self):
         # Implement the action for the Update button press here
-        # print("Connect button pressed")
-        pass
+        print("Connect button pressed")
 
-    def update_button_pressed(self):
-        # Implement the action for the Update button press here
-        # print("Update button pressed")
-        self.root.ids.button.md_bg_color = self.theme_cls.primary_color
-        zeroconf = Zeroconf()
-        listener = MyListener(self)
-        browser = ServiceBrowser(zeroconf, "_http._tcp.local.", listener)
-        self.enabledVar = True
+    def update_button_pressed(self): ##REMOVE 
+        print("update_button_pressed")
+
+    def wait_for_ip(self, dt, listener, zeroconf):
+        screen_manager = self.root
+        initial_screen = screen_manager.get_screen('initial_screen')
+        s1_connect_button = initial_screen.ids.s1_connect
+        s1_update_button = initial_screen.ids.s1_update
+        print("wait_for_ip")
+        app = MDApp.get_running_app()
+        if (app.ip_address):
+            print(f"Found : {app.ip_address}")
+            zeroconf.close()
+            app.event.cancel()
+            s1_connect_button.text = f"CONECTAR A TURBOTYPE \n {app.ip_address}"
+            s1_connect_button.disabled = False
+            s1_connect_button.md_bg_color = app.theme_cls.accent_color
+            s1_update_button.disabled = True
+            Snackbar(
+                text="Exito, dispositivo encontrado",
+                duration=2,
+                bg_color=(0.176, 0.184, 0.243, 1)
+            ).open()
+
 
     def on_icon_button_press(self):
         # Switch to the configuration screen
@@ -202,30 +254,23 @@ class MainApp(MDApp):
 
 class MyListener:
     def __init__(self, app):
-        self.app = app  # Store a reference to the app
-        self.scanning = True
+        app = MDApp.get_running_app()
 
-    def remove_service(self, zeroconf, type, name):
-        # print("Service removed", name)
-        pass
+    def update_service(self, zc: Zeroconf, type_: str, name: str) -> None:
+        print(f"Service {name} updated")
 
-    def add_service(self, zeroconf, type, name):
-        info = zeroconf.get_service_info(type, name)
-        # print("Service added", name)
-        byte_sequence = info.addresses[0]
-        self.ip_address = ipaddress.IPv4Address(byte_sequence).exploded
-        print("  Address:", self.ip_address)
-        # print("  Port:", info.port)
-        if info.addresses:
-            self.app.root.ids.button.text = f"{self.ip_address}"
-            self.app.root.ids.button.md_bg_color = self.app.theme_cls.accent_color
-            self.scanning = False
-            zeroconf.close()
-            print("Zero closed")
+    def remove_service(self, zc: Zeroconf, type_: str, name: str) -> None:
+        print(f"Service {name} removed")
 
-    def update_service(self, zeroconf, service_type, service_name):
-        # Placeholder for the update_service method
-        pass
+    def add_service(self, zc: Zeroconf, type_: str, name: str) -> None:
+        app = MDApp.get_running_app()
+        info = zc.get_service_info(type_, name)
+        print(f"Service {name} found")
+        if (name == 'turbo._http._tcp.local.'):
+            # print(f"EUREKA")
+            byte_sequence = info.addresses[0]
+            app.ip_address = ipaddress.IPv4Address(byte_sequence).exploded
+            print(f"Service {name} added, service addresses=: {app.ip_address}")
 
 
 if __name__ == "__main__":

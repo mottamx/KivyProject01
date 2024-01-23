@@ -2,6 +2,15 @@
 #include <EEPROM.h>
 #include <ESPmDNS.h>
 
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+#define SSD1306_I2C_ADDRESS 0x3C
+#define OLED_RESET -1
+
 #define EEPROM_ADDRESS 0
 #define EEPROM_SIZE 1024
 #define MAX_CONNECTION_ATTEMPTS 3
@@ -11,13 +20,23 @@
 
 const char *ssid = "TypeTurbo";
 const char *password = NULL;
-
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 WiFiServer server(80);
+IPAddress ip;
 
 void setup() {
   Serial.begin(115200);
   EEPROM.begin(EEPROM_SIZE);
   delay(10);
+
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  display.clearDisplay();
+    
+  delay(2000);  // Pausa de 2 segundos
+  // Borrar la pantalla
+  display.clearDisplay();
+  display.setTextColor(SSD1306_WHITE);
+  display.clearDisplay();
 
   String storedSSID, storedPass;
   restoreCredentials(storedSSID, storedPass);
@@ -25,31 +44,54 @@ void setup() {
   if (storedSSID.length() > 0 && storedPass.length() > 0) {
       // Stored credentials exist, try to connect to the WiFi network
       Serial.println("Stored credentials exist");
+      display.clearDisplay();//***//
+      title("::Wifi::");
+      secondline("Linking...");
       int statusInt = connectToWiFi(storedSSID, storedPass);
       if (statusInt == 1) {
-        if (!MDNS.begin("esp32")) {
+        if (!MDNS.begin("turbo")) {
             Serial.println("Error setting up MDNS responder!");
             while(1){delay(1000);}
         }
-        MDNS.addService("http", "tcp", 80);
         Serial.println("mDNS responder started");
-      }    
+        MDNS.addService("http", "tcp", 80);
+        Serial.println(ip);
+        display.clearDisplay();//***//
+        title("::Wifi::");
+        secondline("C to: " +storedSSID);
+        thirdline(ip.toString());
+      }else{
+        display.clearDisplay();//***//
+        title("ERROR");
+        secondline("No pude conectarme");
+        thirdline("Reiniciame");
+      }
   } else {
       // No stored credentials, create an AP to receive new credentials
       Serial.println("No credentials found");
+      display.clearDisplay();//***//
+      title("TypeTurbo");
+      secondline("Own WiFi");
       createAP();
   }
-
+    
     pinMode(CLEAR_EEPROM_BUTTON_PIN, INPUT_PULLUP);
 }
 
 int connectToWiFi(const String& ssid, const String& pass) {
   int attempts = 0;
+  Serial.println("connectToWiFi");
   while (attempts < MAX_CONNECTION_ATTEMPTS) {
+    display.clearDisplay();//***//
+    title("Conectando:");
+    String texto = (String) (attempts+1);
+    secondline("Attempt:" + texto);
     int status = WiFi.begin(ssid.c_str(), pass.c_str());
     if (status == WL_CONNECTED) {
       Serial.println("Connected to WiFi");
+      ip = WiFi.localIP();
       server.begin();
+      Serial.println(ip);
       return 1;
     } else {
       Serial.print("Connection attempt ");
@@ -64,6 +106,9 @@ int connectToWiFi(const String& ssid, const String& pass) {
     //Start own Wifi
     createAP();
     Serial.print("Own AP started");
+    display.clearDisplay();//***//
+    title("TypeTurbo");
+    secondline("Own WiFi");
     return 0;
   }
   return 0;// Default return if the loop exits for some reason without hitting MAX_CONNECTION_ATTEMPTS
@@ -76,6 +121,9 @@ void createAP() {
   Serial.println(WiFi.softAPIP());
   server.begin();
   Serial.println("Self AP is live.");
+  display.clearDisplay();//***//
+  title("TypeTurbo");
+  secondline(".....Own WiFi.....");
 }
 
 void saveCredentials(const String& ssid, const String& pass) {
@@ -118,7 +166,6 @@ void errorCode(const String& error, WiFiClient& client) {
   client.println("Content-Type: text/html");
   client.println("");
   client.println("Error: " + error);
-
   client.stop();
 }
 
@@ -167,17 +214,24 @@ void handleKeysRequest(String requestLine, WiFiClient& client) {
       String passParam = params.substring(separatorIndex + 1);
       //Validate again
       if (ssidParam.startsWith("ssid=") && passParam.startsWith("pass=")) {
+        
         String ssid = urldecode(ssidParam.substring(5));// Removes "ssid="
         String pass = urldecode(passParam.substring(5));// Removes "pass=" 
         Serial.println("SSID: " + ssid);
         Serial.println("Password: " + pass);
         Serial.println("Saving...");
+        display.clearDisplay(); //***//
+        title("Saving");
+        secondline(ssid);
         saveCredentials(ssid, pass);
         client.println("HTTP/1.1 200 OK");
         client.println("Content-Type: text/html");
         client.println("");
         client.println("Saved");
         client.stop();
+        display.clearDisplay(); //***//
+        title("TypeTurbo");
+        secondline("Reboot");
         delay(10000);  /*ESP32 Reset after 10 sec*/
         ESP.restart();  /*ESP restart function*/
       } else {
@@ -196,6 +250,9 @@ void handleKeysRequest(String requestLine, WiFiClient& client) {
 }
 
 void clearEEPROM() {
+  display.clearDisplay(); //***//
+  title("BORRANDO");
+  secondline("Red anterior");
   for (int i = 0; i < 512; i++) {
    EEPROM.write(i, 0);
    }
@@ -231,6 +288,27 @@ int hexCharToInt(char c) {
   return 0;
 }
 
+void title(String text) {
+  //Serial.print("title");
+  display.setTextSize(2);
+  display.setCursor(0,0);
+  display.println(text);
+  display.display();
+}
+void secondline(String text2) {
+  //Serial.print("secondline");
+  display.setTextSize(1);
+  display.setCursor(0,17);
+  display.println(text2);
+  display.display();
+}
+void thirdline(String text3) {
+  //Serial.print("secondline");
+  display.setTextSize(1);
+  display.setCursor(0,30);
+  display.println(text3);
+  display.display();
+}
 void loop() {
   if (digitalRead(CLEAR_EEPROM_BUTTON_PIN) == LOW) {
     // Button is pressed, clear EEPROM

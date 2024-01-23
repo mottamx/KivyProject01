@@ -80,19 +80,9 @@
                         orientation: 'horizontal'
                         spacing: 10
 
-                        Carousel:
-                            id: my_carousel
+                        AsyncImage:
                             size_hint: 0.8, 1
-                            direction: 'right'
-                            AsyncImage:
-                                source: 'http://placehold.it/480x270.png&text=slide-1.png'
-                            AsyncImage:
-                                source: 'http://placehold.it/480x270.png&text=slide-2.png'
-                            AsyncImage:
-                                source: 'http://placehold.it/480x270.png&text=slide-3.png'
-                            AsyncImage:
-                                source: 'http://placehold.it/480x270.png&text=slide-4.png'
-                        
+                            source: 'src/SecScrBanner01.png'                       
                            
                         MDRoundFlatIconButton:
                             text: "Añadir"
@@ -103,17 +93,31 @@
                     BoxLayout:
                         orientation: 'horizontal'
                         spacing: 10
+                            
+                        BoxLayout:
+                            size_hint: 0.4, 1
+                            orientation: 'vertical'
+                            spacing: 10
 
-                        MDRaisedButton:
-                            id: s1_b2
-                            text: 'Btns Scan'
-                            size_hint: .7, 1
+                            MDRaisedButton:
+                                id: s1_update
+                                text: 'Actualizar'
+                                disabled: False
+                                size_hint_y: .4
+                                size_hint_x: 1
+                                on_release: app.update_ip_device()
+
+                            MDRaisedButton:
+                                id: s1_connect
+                                text: 'CONECTAR'
+                                disabled: True
+                                size_hint_y: .6
+                                size_hint_x: 1
+                                on_release: app.connect_device()
                         
-                        MDRaisedButton:
-                            id: s1_b3
-                            text: 'Bigbutton Connect'
-                            pos_hint: {'right': 1}
-                            size_hint: .3, 1
+                        AsyncImage:
+                            size_hint: 0.6, 1
+                            source: 'src/SecScrBanner02.png'  
                     
                     BoxLayout:
                         orientation: 'horizontal'
@@ -241,7 +245,7 @@
                     source: 'src/Wifi_05.png'
                 AsyncImage:
                     source: 'src/Wifi_06.png'
-                    
+
             BoxLayout:
                 size_hint_y: 0.2
                 orientation: 'vertical'
@@ -312,5 +316,5 @@
                 size_hint: None, None
                 size: "200dp", "50dp"
                 pos_hint: {"center_x": 0.5, "center_y": 0.5}  # Center the button
-                text: "SALIR"
+                text: "Proceso automático"
                 
